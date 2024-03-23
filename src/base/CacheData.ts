@@ -1,4 +1,5 @@
-import { NullableCacheDataGenerator, CacheDataGenerator } from '../types'
+import type { NullableCacheDataGenerator, CacheDataGenerator } from '../types'
+import ungapStructuredClone from '@ungap/structured-clone'
 
 type CacheDataCloneStrategy = 'array-shallow-copy'|'object-shallow-copy'
 
@@ -11,6 +12,8 @@ export abstract class CacheData<T> {
     data.dirty = false
     return data
   }
+
+  private static readonly StructuredClone = globalThis.structuredClone ?? ungapStructuredClone
 
   protected _raw: ReturnType<NullableCacheDataGenerator<T>>
   protected generator: NullableCacheDataGenerator<T>
@@ -38,7 +41,7 @@ export abstract class CacheData<T> {
    * The method returns a copied value of the cached data.
    * You can pass a function as a parameter to copy the value. This parameter function should return the copied value.
    * 
-   * If no parameter is passed, it defaults to using JavaScript's `structuredClone` function to copy the value.
+   * If no parameter is passed, it defaults to using Javascript's or @ungap/structured-clone's `structuredClone` function to copy the value.
    * If you prefer shallow copying instead of deep copying,
    * you can use the default options `array-shallow-copy` or `object-shallow-copy`,
    * which are replaced with functions to shallow copy arrays and objects, respectively. This is a syntactic sugar.
@@ -57,7 +60,7 @@ export abstract class CacheData<T> {
       case 'object-shallow-copy':
         return Object.assign({}, this.raw)
       default:
-        return structuredClone(this.raw)
+        return CacheData.StructuredClone(this.raw)
     }
   }
 }
