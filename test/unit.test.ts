@@ -34,6 +34,12 @@ describe('unit-test', () => {
     expect(branch.ensure('1', () => 1).raw).toBe(1)
     branch.delete('1')
     expect(branch.get('1')).toBe(undefined)
+
+    expect(branch.ensure('1/1', () => 2).raw).toBe(2)
+    expect(branch.get('1/1')!.raw).toBe(2)
+    expect(branch.get('1')).toBe(undefined)
+    branch.delete('1')
+    expect(branch.get('1/1')).toBe(undefined)
   })
 
   test('clone', () => {
@@ -137,6 +143,12 @@ describe('unit-test:async', () => {
     expect((await branch.ensure('1', async () => 1)).raw).toBe(1)
     await branch.delete('1')
     expect(branch.get('1')).toBe(undefined)
+
+    expect((await branch.ensure('1/1', async () => 2)).raw).toBe(2)
+    expect(branch.get('1/1')!.raw).toBe(2)
+    expect(branch.get('1')).toBe(undefined)
+    await branch.delete('1')
+    expect(branch.get('1/1')).toBe(undefined)
   })
 
   test('clone', async () => {
