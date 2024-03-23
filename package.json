@@ -1,0 +1,39 @@
+{
+  "name": "cachebranch",
+  "version": "1.0.0",
+  "description": "Not only caches data in a key-value format but also supports efficient data management with a hierarchical structure.",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "typings": "dist/typings/index.d.ts",
+  "scripts": {
+    "build": "node build/index.js && tsc",
+    "test": "jest"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "keywords": [
+    "cache",
+    "caching",
+    "in-memory",
+    "key-value",
+    "nested",
+    "hierarchical",
+    "tree",
+    "memory-efficient",
+    "front-end",
+    "back-end",
+    "data-structure",
+    "lightweight",
+    "high-performance"
+  ],
+  "author": "izure1 <admin@izure.org>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "esbuild": "^0.20.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.3"
+  }
+}
