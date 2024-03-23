@@ -1,5 +1,8 @@
 # cachebranch
 
+[![](https://data.jsdelivr.com/v1/package/npm/cachebranch/badge)](https://www.jsdelivr.com/package/npm/cachebranch)
+![Node.js workflow](https://github.com/izure1/cachebranch/actions/workflows/node.js.yml/badge.svg)
+
 Manage your cache in a hierarchical structure, similar to storing files in directories!  
 Supports both asynchronous and synchronous operations.
 
@@ -110,12 +113,25 @@ user.name = 'test' // Since this is a deeply copied object, it does not modify t
 
 ## Usage
 
+### Node.js (cjs)
+
 ```bash
 npm i cachebranch
 ```
 
 ```typescript
 import { CacheBranchSync, CacheBranchAsync } from 'cachebranch'
+```
+
+### Browser (esm)
+
+```html
+<script type="module">
+  import {
+    CacheBranchSync,
+    CacheBranchAsync
+  } from 'https://cdn.jsdelivr.net/npm/cachebranch@1.x.x/dist/esm/index.min.js'
+</script>
 ```
 
 ## License
