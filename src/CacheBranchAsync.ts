@@ -81,7 +81,7 @@ export class CacheBranchAsync<T> extends CacheBranch<T> {
     if (branch) {
       branch.branches.clear()
       await CacheDataAsync.Update(branch.data, CacheDataAsync.EmptyDataGenerator)
-      CacheDataAsync.SetDirty(branch.data)
+      CacheDataAsync.SetDirty(branch.data, false)
     }
     return this
   }

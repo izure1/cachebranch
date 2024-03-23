@@ -77,11 +77,11 @@ export class CacheBranchSync<T> extends CacheBranch<T> {
   }
 
   delete(key: string): this {
-    const branch = this.getBranch(key)
+    const branch = this.ensureBranch(key, CacheDataSync.EmptyDataGenerator)
     if (branch) {
       branch.branches.clear()
       CacheDataSync.Update(branch.data, CacheDataSync.EmptyDataGenerator)
-      CacheDataSync.SetDirty(branch.data)
+      CacheDataSync.SetDirty(branch.data, false)
     }
     return this
   }

@@ -8,8 +8,8 @@ export abstract class CacheData<T> {
     return data.dirty
   }
 
-  static SetDirty<T>(data: CacheData<T>): CacheData<T> {
-    data.dirty = false
+  static SetDirty<T>(data: CacheData<T>, value: boolean): CacheData<T> {
+    data.dirty = value
     return data
   }
 
