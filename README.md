@@ -75,6 +75,21 @@ branch.set('user/age', () => 21)
 
 Now when a situation arises where you need to re-cache due to dependency issues, the library will automatically help modify the value by recalling the corresponding function.
 
+### Cache Update Following Hierarchical Structure
+
+You may want to update all cached content related to **'user'**. Try using it like this:
+
+```typescript
+branch.cache('user')
+```
+
+This code will update not only **'user'**, but also caches in the lower hierarchy such as **'user/age'**, **'user/nickname'**, etc. If you only want to update **'user'**, pass **false** as the second argument.
+
+```typescript
+const recursive = false
+branch.cache('user', recursive)
+```
+
 ### Preventing Pollution of Cached Values
 
 These cached values are not just primitive types. They can also be objects or arrays. Cached values should not be modified to maintain reliability, but they can become polluted due to developer mistakes. See the example below.
