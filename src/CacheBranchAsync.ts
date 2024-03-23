@@ -36,7 +36,7 @@ export class CacheBranchAsync<T> extends CacheBranch<T> {
   }
 
   async cache(key: string, recursive?: CacheDirection): Promise<this> {
-    const root = this.getBranch(key)
+    const root = this.ensureBranch(key, CacheDataAsync.EmptyDataGenerator)
     if (!root) {
       return this
     }
@@ -77,7 +77,7 @@ export class CacheBranchAsync<T> extends CacheBranch<T> {
   }
 
   async delete(key: string): Promise<this> {
-    const branch = this.getBranch(key)
+    const branch = this.ensureBranch(key, CacheDataAsync.EmptyDataGenerator)
     if (branch) {
       branch.branches.clear()
       await CacheDataAsync.Update(branch.data, CacheDataAsync.EmptyDataGenerator)

@@ -36,7 +36,7 @@ export class CacheBranchSync<T> extends CacheBranch<T> {
   }
 
   cache(key: string, recursive?: CacheDirection): this {
-    const root = this.getBranch(key)
+    const root = this.ensureBranch(key, CacheDataSync.EmptyDataGenerator)
     if (!root) {
       return this
     }
