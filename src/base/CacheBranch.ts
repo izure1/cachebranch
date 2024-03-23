@@ -1,4 +1,4 @@
-import type { NullableCacheDataGenerator, CacheDataGenerator, Deferred } from '../types'
+import type { NullableCacheDataGenerator, CacheDataGenerator, Deferred, CacheDirection } from '../types'
 import { CacheData } from './CacheData'
 
 export abstract class CacheBranch<T> {
@@ -70,13 +70,16 @@ export abstract class CacheBranch<T> {
    * The method re-caches the hierarchical cache data for the given key.
    * It re-executes the function passed when creating the layer to update the cached value.
    * @param key The key value of the hierarchy to be re-cached.
-   * @param recursive If you pass `true` as an argument,
-   * it will re-cache all data for the hierarchical cache up to the lower layers.
-   * For example, if there is a hierarchy like `'user/name/middle'`,
-   * calling the `cache('user', true)` method will re-cache data not only for `'user'` but also for `'user/name'` and `'user/name/middle'` layers.
-   * This helps maintain consistency across related data.
+   * @param recursive You can specify the caching order as either `'top-down'` or `'bottom-up'`.
+   * 
+   * If `'top-down'` is passed as the value, the current layer is cached first, followed by caching of the sub-layers.  
+   * For example, if there are `'user'` and `'user/age'` layers, `'user'` will be cached first, followed by `'user/age'`.
+   * 
+   * If `'bottom-up'` is passed, sub-layers are cached first, followed by caching of the parent layers.
+   * 
+   * If this parameter is not specified, only the current layer is cached.
    */
-  abstract cache(key: string, recursive?: boolean): Deferred<this>
+  abstract cache(key: string, recursive?: CacheDirection): Deferred<this>
 
   /**
    * If there is no cache generated for the specified key value, it creates one; otherwise, it returns the existing cache data.

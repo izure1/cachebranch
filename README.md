@@ -25,7 +25,7 @@ await branch.set('user/nickname', async () => {
   const nickname = await res.text()
   return nickname
 })
-await branch.set('user/nickname/html', async () => {
+await branch.set('user/nickname', async () => {
   const nickname = await branch.ensure('user/nickname', async () => 'Anonymous')
   return (
     <div>{nickname.raw}</div>
@@ -33,8 +33,8 @@ await branch.set('user/nickname/html', async () => {
 })
 
 
-// Re-cache 'user', 'user/nickname', 'user/nickname/color'
-await branch.cache('user')
+// Re-cache 'user', 'user/nickname', 'user/nickname/html'
+await branch.cache('user', 'top-down')
 
 const user = await branch.ensure('user').then(cache => cache.clone())
 
@@ -83,14 +83,13 @@ Now when a situation arises where you need to re-cache due to dependency issues,
 You may want to update all cached content related to **'user'**. Try using it like this:
 
 ```typescript
-branch.cache('user')
+branch.cache('user', 'bottom-up')
 ```
 
-This code will update not only **'user'**, but also caches in the lower hierarchy such as **'user/age'**, **'user/nickname'**, etc. If you only want to update **'user'**, pass **false** as the second argument.
+This code will update not only **'user'**, but also caches in the lower hierarchy such as **'user/age'**, **'user/nickname'**, etc. If you only want to update **'user'**, omit the second argument.
 
 ```typescript
-const recursive = false
-branch.cache('user', recursive)
+branch.cache('user')
 ```
 
 ### Preventing Pollution of Cached Values

@@ -4,4 +4,5 @@ export type NullableCacheDataGenerator<T> = NullableCacheDataGeneratorSync<T>|Nu
 export type CacheDataGeneratorSync<T> = () => T
 export type CacheDataGeneratorAsync<T> = () => Promise<T>
 export type CacheDataGenerator<T> = CacheDataGeneratorSync<T>|CacheDataGeneratorAsync<T>
+export type CacheDirection = 'top-down'|'bottom-up'
 export type Deferred<T> = T|Promise<T>

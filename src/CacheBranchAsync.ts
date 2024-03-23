@@ -1,4 +1,4 @@
-import type { NullableCacheDataGeneratorAsync, CacheDataGeneratorAsync } from './types'
+import type { NullableCacheDataGeneratorAsync, CacheDataGeneratorAsync, CacheDirection } from './types'
 import { CacheBranch } from './base/CacheBranch'
 import { CacheDataAsync } from './CacheDataAsync'
 
@@ -35,17 +35,22 @@ export class CacheBranchAsync<T> extends CacheBranch<T> {
     }) as CacheBranchAsync<T>
   }
 
-  async cache(key: string, recursive = true): Promise<this> {
+  async cache(key: string, recursive?: CacheDirection): Promise<this> {
     const root = this.getBranch(key)
     if (!root) {
       return this
     }
-    if (recursive) {
+    if (recursive === 'bottom-up') {
       for (const key of root.branches.keys()) {
-        await root.cache(key)
+        await root.cache(key, recursive)
       }
     }
     await CacheDataAsync.Cache(root.data)
+    if (recursive === 'top-down') {
+      for (const key of root.branches.keys()) {
+        await root.cache(key, recursive)
+      }
+    }
     return this
   }
 

@@ -1,4 +1,4 @@
-import type { NullableCacheDataGeneratorSync, CacheDataGeneratorSync } from './types'
+import type { NullableCacheDataGeneratorSync, CacheDataGeneratorSync, CacheDirection } from './types'
 import { CacheBranch } from './base/CacheBranch'
 import { CacheDataSync } from './CacheDataSync'
 
@@ -35,17 +35,22 @@ export class CacheBranchSync<T> extends CacheBranch<T> {
     }) as CacheBranchSync<T>
   }
 
-  cache(key: string, recursive = true): this {
+  cache(key: string, recursive?: CacheDirection): this {
     const root = this.getBranch(key)
     if (!root) {
       return this
     }
-    if (recursive) {
+    if (recursive === 'bottom-up') {
       for (const key of root.branches.keys()) {
-        root.cache(key)
+        root.cache(key, recursive)
       }
     }
     CacheDataSync.Cache(root.data)
+    if (recursive === 'top-down') {
+      for (const key of root.branches.keys()) {
+        root.cache(key, recursive)
+      }
+    }
     return this
   }
 
