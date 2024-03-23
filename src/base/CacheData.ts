@@ -1,7 +1,7 @@
-import type { NullableCacheDataGenerator, CacheDataGenerator, CacheDataCopy } from '../types'
+import type { NullableCacheDataGenerator, CacheDataCopy } from '../types'
 import ungapStructuredClone from '@ungap/structured-clone'
 
-export type CacheDataCloneStrategy = 'array-shallow-copy'|'object-shallow-copy'
+export type CacheDataCloneStrategy = 'array-shallow-copy'|'object-shallow-copy'|'deep-copy'
 
 export abstract class CacheData<T> {
   static IsDirty<T>(data: CacheData<T>): boolean {
@@ -49,12 +49,16 @@ export abstract class CacheData<T> {
    * If you want to perform a shallow copy, simply pass the strings `array-shallow-copy` or `object-shallow-copy` for easy use.
    * The default is `structuredClone`.
    */
-  clone(strategy?: CacheDataCloneStrategy|CacheDataCopy<T>): T {
+  clone(strategy: CacheDataCloneStrategy|CacheDataCopy<T> = 'deep-copy'): T {
+    if (strategy && typeof strategy !== 'string') {
+      return strategy(this.raw)
+    }
     switch (strategy) {
       case 'array-shallow-copy':
         return <T>[].concat(this.raw as any)
       case 'object-shallow-copy':
         return Object.assign({}, this.raw)
+      case 'deep-copy':
       default:
         return CacheData.StructuredClone(this.raw)
     }
