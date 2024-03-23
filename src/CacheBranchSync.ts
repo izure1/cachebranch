@@ -40,12 +40,12 @@ export class CacheBranchSync<T> extends CacheBranch<T> {
     if (!root) {
       return this
     }
-    CacheDataSync.Cache(root.data)
     if (recursive) {
       for (const key of root.branches.keys()) {
         root.cache(key)
       }
     }
+    CacheDataSync.Cache(root.data)
     return this
   }
 

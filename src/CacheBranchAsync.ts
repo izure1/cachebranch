@@ -40,12 +40,12 @@ export class CacheBranchAsync<T> extends CacheBranch<T> {
     if (!root) {
       return this
     }
-    await CacheDataAsync.Cache(root.data)
     if (recursive) {
       for (const key of root.branches.keys()) {
         await root.cache(key)
       }
     }
+    await CacheDataAsync.Cache(root.data)
     return this
   }
 
