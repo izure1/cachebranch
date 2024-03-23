@@ -81,17 +81,20 @@ describe('branch-unit-test', () => {
     const branch = new CacheBranchSync<number>()
 
     let count = 0
-    branch.ensure('count', () => count)
-    branch.ensure('count/+1', () => count+1)
+    branch.set('count', () => count)
+    branch.set('count/+1', () => branch.ensure('count', () => 0).raw+1)
+    branch.set('count/+1/+1', () => branch.ensure('count/+1', () => 0).raw+1)
 
     expect(branch.get('count')!.raw).toBe(0)
     expect(branch.get('count/+1')!.raw).toBe(1)
+    expect(branch.get('count/+1/+1')!.raw).toBe(2)
 
     count++
     branch.cache('count', true)
 
     expect(branch.get('count')!.raw).toBe(1)
     expect(branch.get('count/+1')!.raw).toBe(2)
+    expect(branch.get('count/+1/+1')!.raw).toBe(3)
   })
 
   test('branch', () => {
@@ -180,11 +183,13 @@ describe('branch-unit-test:async', () => {
     const branch = new CacheBranchAsync<number>()
 
     let count = 0
-    await branch.ensure('count', async () => count)
-    await branch.ensure('count/+1', async () => count+1)
+    await branch.set('count', async () => count)
+    await branch.set('count/+1', () => branch.ensure('count', async () => 0).then(c => c.raw+1))
+    await branch.set('count/+1/+1', () => branch.ensure('count/+1', async () => 0).then(c => c.raw+1))
 
     expect(branch.get('count')!.raw).toBe(0)
     expect(branch.get('count/+1')!.raw).toBe(1)
+    expect(branch.get('count/+1/+1')!.raw).toBe(2)
 
     count++
     await delay(1000)
@@ -192,6 +197,7 @@ describe('branch-unit-test:async', () => {
 
     expect(branch.get('count')!.raw).toBe(1)
     expect(branch.get('count/+1')!.raw).toBe(2)
+    expect(branch.get('count/+1/+1')!.raw).toBe(3)
   })
 
   test('branch', async () => {
