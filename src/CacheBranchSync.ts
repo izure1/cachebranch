@@ -2,7 +2,7 @@ import type { NullableCacheDataGeneratorSync, CacheDataGeneratorSync, CacheDirec
 import { CacheBranch } from './base/CacheBranch'
 import { CacheDataSync } from './CacheDataSync'
 
-export class CacheBranchSync<T> extends CacheBranch<T> {
+export class CacheBranchSync<T = any> extends CacheBranch<T> {
   declare protected readonly data: CacheDataSync<T>
   declare protected readonly branches: Map<string, CacheBranchSync<T>>
 

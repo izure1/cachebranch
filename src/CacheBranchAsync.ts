@@ -2,7 +2,7 @@ import type { NullableCacheDataGeneratorAsync, CacheDataGeneratorAsync, CacheDir
 import { CacheBranch } from './base/CacheBranch'
 import { CacheDataAsync } from './CacheDataAsync'
 
-export class CacheBranchAsync<T> extends CacheBranch<T> {
+export class CacheBranchAsync<T = any> extends CacheBranch<T> {
   declare protected readonly data: CacheDataAsync<T>
   declare protected readonly branches: Map<string, CacheBranchAsync<T>>
 
