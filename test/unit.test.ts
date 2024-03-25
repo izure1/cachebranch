@@ -87,8 +87,8 @@ describe('branch-unit-test', () => {
     const branch = new CacheBranchSync<number>()
 
     let count = 0
-    branch.set('count', () => branch.ensure('count/+1', () => 0).raw+1)
-    branch.set('count/+1', () => branch.ensure('count/+1/+1', () => 0).raw+1)
+    branch.set('count', (b) => b.ensure('count/+1', () => 0).raw+1)
+    branch.set('count/+1', (b) => b.ensure('count/+1/+1', () => 0).raw+1)
     branch.set('count/+1/+1', () => count)
     branch.cache('count', 'bottom-up')
 
@@ -196,8 +196,8 @@ describe('branch-unit-test:async', () => {
     const branch = new CacheBranchAsync<number>()
 
     let count = 0
-    await branch.set('count', () => branch.ensure('count/+1', async () => 0).then(c => c.raw+1))
-    await branch.set('count/+1', () => branch.ensure('count/+1/+1', async () => 0).then(c => c.raw+1))
+    await branch.set('count', (b) => b.ensure('count/+1', async () => 0).then(c => c.raw+1))
+    await branch.set('count/+1', (b) => b.ensure('count/+1/+1', async () => 0).then(c => c.raw+1))
     await branch.set('count/+1/+1', async () => count)
     await branch.cache('count', 'bottom-up')
 

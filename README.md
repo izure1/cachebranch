@@ -12,9 +12,9 @@ import { CacheBranchAsync } from 'cachebranch'
 const branch = new CacheBranchAsync()
 
 // Set cache
-await branch.set('user', async () => {
-  const name = await branch.ensure('user/name', async () => 'Unknown').raw
-  const html = await branch.ensure('user/name/html', async () => <div>Loading...</div>).clone()
+await branch.set('user', async (b) => {
+  const name = await b.ensure('user/name', async () => 'Unknown').raw
+  const html = await b.ensure('user/name/html', async () => <div>Loading...</div>).clone()
   return {
     name,
     html,
@@ -26,7 +26,7 @@ await branch.set('user/name', async () => (
 ))
 
 await branch.set('user/name/html', async (b) => {
-  const name = await branch.ensure('user/name', async () => 'Unknown').raw
+  const name = await b.ensure('user/name', async () => 'Unknown').raw
   return (
     <div>{name}</div>
   )
@@ -157,9 +157,9 @@ const age = await branch.ensure('user/age', getAge).raw // Instead, use it like 
 The **set** method overrides the existing cache creation function and creates a new cache value. However, it's not designed to 'update' cache values and should only be used when you want to change the cache creation function. It's mostly used to overwrite cache creation functions with **ensure** methods for null safety. See the example below.
 
 ```typescript
-await branch.set('user', async () => {
+await branch.set('user', async (b) => {
   // Here, a temporary function is created for null safety
-  const age = await branch.ensure('user/age', () => 0).raw
+  const age = await b.ensure('user/age', () => 0).raw
   return {
     age
   }
@@ -184,16 +184,16 @@ When using the **cache** method to update cache values, pay attention to the sel
 Let's see an example below.
 
 ```typescript
-const user = await branch.set('user', async () => {
-  const name = await branch.ensure('user/name', async () => 'Unknown').raw
-  const age = await branch.ensure('user/age', async () => 0).raw
+await branch.set('user', async (b) => {
+  const name = await b.ensure('user/name', async () => 'Unknown').raw
+  const age = await b.ensure('user/age', async () => 0).raw
   return {
     name,
     age,
   }
 })
 
-user.cache('user', 'bottom-up')
+await user.cache('user', 'bottom-up')
 ```
 
 In this example, **'user'** depends on **'user/name'** and **'user/age'**.

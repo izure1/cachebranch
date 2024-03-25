@@ -5,11 +5,14 @@ import { CacheDataSync } from './CacheDataSync'
 export class CacheBranchSync<T = any> extends CacheBranch<T> {
   declare protected readonly data: CacheDataSync<T>
   declare protected readonly branches: Map<string, CacheBranchSync<T>>
+  protected readonly root: CacheBranchSync<T>
 
   constructor(
-    generator: NullableCacheDataGeneratorSync<T> = CacheDataSync.EmptyDataGenerator
+    generator: NullableCacheDataGeneratorSync<T> = CacheDataSync.EmptyDataGenerator,
+    root?: CacheBranchSync<T>
   ) {
     super(new CacheDataSync(generator))
+    this.root = root ?? this
   }
 
   protected ensureBranch(
@@ -19,7 +22,7 @@ export class CacheBranchSync<T = any> extends CacheBranch<T> {
     return this.to(key, (b, k) => {
       const branch = b as CacheBranchSync<T>
       if (!branch.branches.has(k)) {
-        branch.branches.set(k, new CacheBranchSync<T>(generator))
+        branch.branches.set(k, new CacheBranchSync<T>(generator, this.root))
       }
       return branch.branches.get(k)!
     }) as CacheBranchSync<T>
@@ -36,19 +39,19 @@ export class CacheBranchSync<T = any> extends CacheBranch<T> {
   }
 
   cache(key: string, recursive?: CacheDirection): this {
-    const root = this.ensureBranch(key, CacheDataSync.EmptyDataGenerator)
-    if (!root) {
+    const branch = this.ensureBranch(key, CacheDataSync.EmptyDataGenerator)
+    if (!branch) {
       return this
     }
     if (recursive === 'bottom-up') {
-      for (const key of root.branches.keys()) {
-        root.cache(key, recursive)
+      for (const key of branch.branches.keys()) {
+        branch.cache(key, recursive)
       }
     }
-    CacheDataSync.Cache(root.data)
+    CacheDataSync.Cache(this.root, branch.data)
     if (recursive === 'top-down') {
-      for (const key of root.branches.keys()) {
-        root.cache(key, recursive)
+      for (const key of branch.branches.keys()) {
+        branch.cache(key, recursive)
       }
     }
     return this
@@ -57,7 +60,7 @@ export class CacheBranchSync<T = any> extends CacheBranch<T> {
   ensure(key: string, generator: CacheDataGeneratorSync<T>): CacheDataSync<T> {
     const branch = this.ensureBranch(key, CacheDataSync.EmptyDataGenerator)
     if (!CacheDataSync.IsDirty(branch.data)) {
-      CacheDataSync.Update(branch.data, generator)
+      CacheDataSync.Update(this.root, branch.data, generator)
     }
     return branch.data
   }
@@ -72,7 +75,7 @@ export class CacheBranchSync<T = any> extends CacheBranch<T> {
 
   set(key: string, generator: CacheDataGeneratorSync<T>): this {
     const branch = this.ensureBranch(key, CacheDataSync.EmptyDataGenerator)
-    CacheDataSync.Update(branch.data, generator)
+    CacheDataSync.Update(this.root, branch.data, generator)
     return this
   }
 
@@ -80,7 +83,7 @@ export class CacheBranchSync<T = any> extends CacheBranch<T> {
     const branch = this.ensureBranch(key, CacheDataSync.EmptyDataGenerator)
     if (branch) {
       branch.branches.clear()
-      CacheDataSync.Update(branch.data, CacheDataSync.EmptyDataGenerator)
+      CacheDataSync.Update(this.root, branch.data, CacheDataSync.EmptyDataGenerator)
       CacheDataSync.SetDirty(branch.data, false)
     }
     return this

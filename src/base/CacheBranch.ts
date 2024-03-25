@@ -2,6 +2,7 @@ import type { NullableCacheDataGenerator, CacheDataGenerator, Deferred, CacheDir
 import { CacheData } from './CacheData'
 
 export abstract class CacheBranch<T> {
+  protected abstract readonly root: CacheBranch<T>
   protected readonly data: CacheData<T>
   protected readonly branches: Map<string, CacheBranch<T>>
 

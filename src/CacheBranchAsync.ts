@@ -5,11 +5,14 @@ import { CacheDataAsync } from './CacheDataAsync'
 export class CacheBranchAsync<T = any> extends CacheBranch<T> {
   declare protected readonly data: CacheDataAsync<T>
   declare protected readonly branches: Map<string, CacheBranchAsync<T>>
+  protected readonly root: CacheBranchAsync<T>
 
   constructor(
-    generator: NullableCacheDataGeneratorAsync<T> = CacheDataAsync.EmptyDataGenerator
+    generator: NullableCacheDataGeneratorAsync<T> = CacheDataAsync.EmptyDataGenerator,
+    root?: CacheBranchAsync<T>
   ) {
     super(new CacheDataAsync(generator))
+    this.root = root ?? this
   }
 
   protected ensureBranch(
@@ -19,7 +22,7 @@ export class CacheBranchAsync<T = any> extends CacheBranch<T> {
     return this.to(key, (b, k) => {
       const branch = b as CacheBranchAsync<T>
       if (!branch.branches.has(k)) {
-        branch.branches.set(k, new CacheBranchAsync<T>(generator))
+        branch.branches.set(k, new CacheBranchAsync<T>(generator, this.root))
       }
       return branch.branches.get(k)!
     }) as CacheBranchAsync<T>
@@ -36,19 +39,19 @@ export class CacheBranchAsync<T = any> extends CacheBranch<T> {
   }
 
   async cache(key: string, recursive?: CacheDirection): Promise<this> {
-    const root = this.ensureBranch(key, CacheDataAsync.EmptyDataGenerator)
-    if (!root) {
+    const branch = this.ensureBranch(key, CacheDataAsync.EmptyDataGenerator)
+    if (!branch) {
       return this
     }
     if (recursive === 'bottom-up') {
-      for (const key of root.branches.keys()) {
-        await root.cache(key, recursive)
+      for (const key of branch.branches.keys()) {
+        await branch.cache(key, recursive)
       }
     }
-    await CacheDataAsync.Cache(root.data)
+    await CacheDataAsync.Cache(this.root, branch.data)
     if (recursive === 'top-down') {
-      for (const key of root.branches.keys()) {
-        await root.cache(key, recursive)
+      for (const key of branch.branches.keys()) {
+        await branch.cache(key, recursive)
       }
     }
     return this
@@ -57,7 +60,7 @@ export class CacheBranchAsync<T = any> extends CacheBranch<T> {
   async ensure(key: string, generator: CacheDataGeneratorAsync<T>): Promise<CacheDataAsync<T>> {
     const branch = this.ensureBranch(key, CacheDataAsync.EmptyDataGenerator)
     if (!CacheDataAsync.IsDirty(branch.data)) {
-      await CacheDataAsync.Update(branch.data, generator)
+      await CacheDataAsync.Update(this.root, branch.data, generator)
     }
     return branch.data
   }
@@ -72,7 +75,7 @@ export class CacheBranchAsync<T = any> extends CacheBranch<T> {
 
   async set(key: string, generator: CacheDataGeneratorAsync<T>): Promise<this> {
     const branch = this.ensureBranch(key, CacheDataAsync.EmptyDataGenerator)
-    await CacheDataAsync.Update(branch.data, generator)
+    await CacheDataAsync.Update(this.root, branch.data, generator)
     return this
   }
 
@@ -80,7 +83,7 @@ export class CacheBranchAsync<T = any> extends CacheBranch<T> {
     const branch = this.ensureBranch(key, CacheDataAsync.EmptyDataGenerator)
     if (branch) {
       branch.branches.clear()
-      await CacheDataAsync.Update(branch.data, CacheDataAsync.EmptyDataGenerator)
+      await CacheDataAsync.Update(this.root, branch.data, CacheDataAsync.EmptyDataGenerator)
       CacheDataAsync.SetDirty(branch.data, false)
     }
     return this

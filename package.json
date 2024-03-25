@@ -1,6 +1,6 @@
 {
   "name": "cachebranch",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Not only caches data in a key-value format but also supports efficient data management with a hierarchical structure.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
