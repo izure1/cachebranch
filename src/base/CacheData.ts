@@ -3,23 +3,29 @@ import ungapStructuredClone from '@ungap/structured-clone'
 
 export type CacheDataCloneStrategy = 'array-shallow-copy'|'object-shallow-copy'|'deep-copy'
 
-export abstract class CacheData<T> {
-  static IsDirty<T>(data: CacheData<T>): boolean {
+export abstract class CacheData<T extends Record<string, any>, K extends keyof T> {
+  static IsDirty<
+    T extends Record<string, any>,
+    K extends keyof T
+  >(data: CacheData<T, K>): boolean {
     return data.dirty
   }
 
-  static SetDirty<T>(data: CacheData<T>, value: boolean): CacheData<T> {
+  static SetDirty<
+    T extends Record<string, any>,
+    K extends keyof T
+  >(data: CacheData<T, K>, value: boolean): CacheData<T, K> {
     data.dirty = value
     return data
   }
 
   protected static readonly StructuredClone = globalThis.structuredClone ?? ungapStructuredClone
 
-  protected _raw: ReturnType<NullableCacheDataGenerator<T>>
-  protected generator: NullableCacheDataGenerator<T>
+  protected _raw: ReturnType<NullableCacheDataGenerator<T, keyof T>>
+  protected generator: NullableCacheDataGenerator<T, keyof T>
   protected dirty: boolean
 
-  constructor(generator: NullableCacheDataGenerator<T>) {
+  constructor(generator: NullableCacheDataGenerator<T, keyof T>) {
     this._raw = undefined
     this.dirty = false
     this.generator = generator
@@ -30,11 +36,11 @@ export abstract class CacheData<T> {
    * It was generated at the time of caching, so there is a risk of modification if it's an object due to shallow copying.
    * Therefore, if it's not a primitive type, please avoid using this value directly and use the `clone` method to use a copied version of the data.
    */
-  get raw(): T {
+  get raw(): T[K] {
     if (!this.dirty) {
       throw new Error(`The data is not initialized and cannot be accessed. Please use the 'ensure' or 'set' method to create the data first.`)
     }
-    return this._raw! as T
+    return this._raw! as T[K]
   }
 
   /**
@@ -49,13 +55,13 @@ export abstract class CacheData<T> {
    * If you want to perform a shallow copy, simply pass the strings `array-shallow-copy` or `object-shallow-copy` for easy use.
    * The default is `structuredClone`.
    */
-  clone(strategy: CacheDataCloneStrategy|CacheDataCopy<T> = 'deep-copy'): T {
+  clone(strategy: CacheDataCloneStrategy|CacheDataCopy<T, K> = 'deep-copy'): T[K] {
     if (strategy && typeof strategy !== 'string') {
       return strategy(this.raw)
     }
     switch (strategy) {
       case 'array-shallow-copy':
-        return <T>[].concat(this.raw as any)
+        return <T[K]>[].concat(this.raw as any)
       case 'object-shallow-copy':
         return Object.assign({}, this.raw)
       case 'deep-copy':

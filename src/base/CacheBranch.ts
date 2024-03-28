@@ -1,12 +1,12 @@
 import type { NullableCacheDataGenerator, CacheDataGenerator, Deferred, CacheDirection } from '../types'
 import { CacheData } from './CacheData'
 
-export abstract class CacheBranch<T> {
+export abstract class CacheBranch<T extends Record<string, any>> {
   protected abstract readonly root: CacheBranch<T>
-  protected readonly data: CacheData<T>
+  protected readonly data: CacheData<T, keyof T>
   protected readonly branches: Map<string, CacheBranch<T>>
 
-  constructor(data: CacheData<T>) {
+  constructor(data: CacheData<T, keyof T>) {
     this.data = data
     this.branches = new Map()
   }
@@ -16,12 +16,12 @@ export abstract class CacheBranch<T> {
    * For instance, if you pass `'user/name/middle'` as the parameter, it will return `['user', 'name', 'middle']` as the split values.
    * @param key The key value to split.
    */
-  protected tokens(key: string): string[] {
-    return key.split('/')
+  protected tokens(key: keyof T): string[] {
+    return (key as string).split('/')
   }
 
   protected to(
-    key: string,
+    key: keyof T,
     getNextBranch: (
       branch: CacheBranch<T>,
       key: string,
@@ -55,9 +55,9 @@ export abstract class CacheBranch<T> {
    * However, until a value is specified using the `ensure` or set method,
    * this value remains uninitialized and inaccessible to the user.
    */
-  protected abstract ensureBranch(
-    key: string,
-    generator: NullableCacheDataGenerator<T>
+  protected abstract ensureBranch<K extends keyof T>(
+    key: K,
+    generator: NullableCacheDataGenerator<T, K>
   ): CacheBranch<T>
 
   /**
@@ -65,7 +65,7 @@ export abstract class CacheBranch<T> {
    * If any intermediate layer is not yet created, it returns `undefined`.
    * @param key The key value to structure.
    */
-  protected abstract getBranch(key: string): CacheBranch<T>|undefined
+  protected abstract getBranch<K extends keyof T>(key: K): CacheBranch<T>|undefined
 
   /**
    * The method re-caches the hierarchical cache data for the given key.
@@ -80,7 +80,7 @@ export abstract class CacheBranch<T> {
    * 
    * If this parameter is not specified, only the current layer is cached.
    */
-  abstract cache(key: string, recursive?: CacheDirection): Deferred<this>
+  abstract cache(key: keyof T, recursive?: CacheDirection): Deferred<this>
 
   /**
    * If there is no cache generated for the specified key value, it creates one; otherwise, it returns the existing cache data.
@@ -88,13 +88,16 @@ export abstract class CacheBranch<T> {
    * @param generator The cache creation function.
    * If there is no cache, it calls this function and stores the returned value as the cache.
    */
-  abstract ensure(key: string, generator: CacheDataGenerator<T>): Deferred<CacheData<T>>
+  abstract ensure<K extends keyof T>(
+    key: K,
+    generator: CacheDataGenerator<T, K>
+  ): Deferred<CacheData<T, K>>
 
   /**
    * It retrieves the cache for the specified key value. If the cache does not exist, it returns `undefined`.
    * @param key The key value for which to retrieve the cache.
    */
-  abstract get(key: string): Deferred<CacheData<T>|undefined>
+  abstract get<K extends keyof T>(key: K): Deferred<CacheData<T, K>|undefined>
 
   /**
    * It reassigns the cache for the specified key value.
@@ -102,7 +105,10 @@ export abstract class CacheBranch<T> {
    * @param key The key value for which to reassign the cache.
    * @param generator This is the cache creation function. It is called to obtain a value that will be stored as the cache.
    */
-  abstract set(key: string, generator: CacheDataGenerator<T>): Deferred<this>
+  abstract set<K extends keyof T>(
+    key: K,
+    generator: CacheDataGenerator<T, K>
+  ): Deferred<this>
 
   /**
    * This deletes the cache associated with the specified key.
@@ -110,5 +116,5 @@ export abstract class CacheBranch<T> {
    * For example, if there is a hierarchy like `'user/name/middle'`, deleting `'user/name'` will also remove the sub-level `'user/name/middle'`.
    * @param key The key value to delete.
    */
-  abstract delete(key: string): Deferred<this>
+  abstract delete(key: keyof T): Deferred<this>
 }

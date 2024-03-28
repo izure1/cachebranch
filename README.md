@@ -199,6 +199,45 @@ await user.cache('user', 'bottom-up')
 In this example, **'user'** depends on **'user/name'** and **'user/age'**.
 Therefore, to obtain the latest values, **'user/name'** and **'user/age'** should be updated first. Therefore, caching should be done in the **bottom-up** manner.
 
+## Writing in TypeScript
+
+If you want to infer types for the return values of each cache, you can use TypeScript as follows:
+
+Pass a generic type representing the shape of **Key: return type** record.
+
+```tsx
+import { CacheBranchAsync } from 'cachebranch'
+
+const branch = new CacheBranchAsync<{
+  'user': {
+    'name': string
+    'html': HTMLElement
+  },
+  'user/name': string
+  'user/name/html': HTMLElement
+}>()
+
+await branch.set('user', async (b) => {
+  const name = await b.ensure('user/name', async () => 'Unknown').raw
+  const html = await b.ensure('user/name/html', async () => <div>Loading...</div>).clone()
+  return {
+    name,
+    html,
+  }
+})
+
+await branch.set('user/name', async () => (
+  await fetch('...').then(res => res.text())
+))
+
+await branch.set('user/name/html', async (b) => {
+  const name = await b.ensure('user/name', async () => 'Unknown').raw
+  return (
+    <div>{name}</div>
+  )
+})
+```
+
 ## License
 
 MIT license

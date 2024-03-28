@@ -5,7 +5,10 @@ function delay(duration: number): Promise<void> {
 }
 
 describe('unit-test', () => {
-  let branch: CacheBranchSync<number>
+  let branch: CacheBranchSync<{
+    '1': number
+    '1/1': number
+  }>
   beforeEach(() => {
     branch = new CacheBranchSync()
   })
@@ -54,7 +57,11 @@ describe('unit-test', () => {
 })
 
 describe('branch-unit-test', () => {
-  let branch: CacheBranchSync<string>
+  let branch: CacheBranchSync<{
+    'user': undefined
+    'user/name': string
+    'user/name/first': string
+  }>
   beforeEach(() => {
     branch = new CacheBranchSync()
   })
@@ -84,7 +91,11 @@ describe('branch-unit-test', () => {
   })
 
   test('caching', () => {
-    const branch = new CacheBranchSync<number>()
+    const branch = new CacheBranchSync<{
+      'count': number
+      'count/+1': number
+      'count/+1/+1': number
+    }>()
 
     let count = 0
     branch.set('count', (b) => b.ensure('count/+1', () => 0).raw+1)
@@ -105,16 +116,19 @@ describe('branch-unit-test', () => {
   })
 
   test('branch', () => {
-    expect(branch.get('user/name/middle')).toBe(undefined)
+    expect(branch.get('user/name/first')).toBe(undefined)
     expect(branch.get('user/name')).toBe(undefined)
-    expect(branch.ensure('user/name/middle', () => 'lee').raw).toBe('lee')
+    expect(branch.ensure('user/name/first', () => 'lee').raw).toBe('lee')
     expect(branch.get('user/name')).toBe(undefined)
   })
 })
 
 
 describe('unit-test:async', () => {
-  let branch: CacheBranchAsync<number>
+  let branch: CacheBranchAsync<{
+    '1': number
+    '1/1': number
+  }>
   beforeEach(() => {
     branch = new CacheBranchAsync()
   })
@@ -152,7 +166,9 @@ describe('unit-test:async', () => {
   })
 
   test('clone', async () => {
-    const branch = new CacheBranchAsync<unknown>()
+    const branch = new CacheBranchAsync<{
+      data: { test: number }
+    }>()
     expect(branch.get('data')).toBe(undefined)
 
     expect(
@@ -163,7 +179,11 @@ describe('unit-test:async', () => {
 })
 
 describe('branch-unit-test:async', () => {
-  let branch: CacheBranchAsync<string>
+  let branch: CacheBranchAsync<{
+    'user': undefined
+    'user/name': string
+    'user/name/first': string
+  }>
   beforeEach(() => {
     branch = new CacheBranchAsync()
   })
@@ -193,7 +213,11 @@ describe('branch-unit-test:async', () => {
   })
 
   test('caching', async () => {
-    const branch = new CacheBranchAsync<number>()
+    const branch = new CacheBranchAsync<{
+      'count': number
+      'count/+1': number
+      'count/+1/+1': number
+    }>()
 
     let count = 0
     await branch.set('count', (b) => b.ensure('count/+1', async () => 0).then(c => c.raw+1))
@@ -215,9 +239,9 @@ describe('branch-unit-test:async', () => {
   })
 
   test('branch', async () => {
-    expect(branch.get('user/name/middle')).toBe(undefined)
+    expect(branch.get('user/name/first')).toBe(undefined)
     expect(branch.get('user/name')).toBe(undefined)
-    expect((await branch.ensure('user/name/middle', async () => 'lee')).raw).toBe('lee')
+    expect((await branch.ensure('user/name/first', async () => 'lee')).raw).toBe('lee')
     expect(branch.get('user/name')).toBe(undefined)
   })
 })
