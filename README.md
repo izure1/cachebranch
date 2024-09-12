@@ -3,6 +3,8 @@
 [![](https://data.jsdelivr.com/v1/package/npm/cachebranch/badge)](https://www.jsdelivr.com/package/npm/cachebranch)
 ![Node.js workflow](https://github.com/izure1/cachebranch/actions/workflows/node.js.yml/badge.svg)
 
+## Note: This library is no longer maintained. Please use [cache-entanglement](https://github.com/izure1/cache-entanglement) instead.
+
 Manage your cache in a hierarchical structure, similar to storing files in directories!  
 Supports both asynchronous and synchronous operations.
 
